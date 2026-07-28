@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Battery STC &amp; PDRS BESS Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+
+  :root {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --border: #d9e0e8;
+    --border-lit: #c7d2df;
+    --text: #142033;
+    --muted: #667085;
+    --bstc: #21aaff;
+    --bstc-soft: rgba(33, 170, 255, 0.10);
+    --bstc-border: rgba(33, 170, 255, 0.30);
+    --accent: #21aaff;
+    --accent-hover: #34374c;
+    --error: #b42318;
+    --error-bg: #fff1f0;
+    --error-border: #fecdca;
+    --shadow: 0 18px 45px rgba(20, 32, 51, 0.08);
+    --shadow-soft: 0 8px 24px rgba(20, 32, 51, 0.06);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background:
+      radial-gradient(circle at top left, rgba(33, 170, 255, 0.07), transparent 34rem),
+      linear-gradient(180deg, #ffffff 0%, var(--bg) 34%);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    padding: 42px 22px 64px;
+  }
+
+  .page-header {
+    max-width: 1080px;
+    margin: 0 auto 28px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    padding-right: 220px;
+  }
+
+  .page-header h2 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    font-size: clamp(24px, 3.2vw, 38px);
+    letter-spacing: -0.035em;
+    color: var(--text);
+    line-height: 1.08;
+  }
+
+  .page-header h1 span.b { color: var(--bstc); }
+
+  .page-header p {
+    margin-top: 10px;
+    max-width: 860px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+    display: none;
+  }
+
+  .brand-logo {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 180px;
+    height: auto;
+    object-fit: contain;
+  }
+
+  @media (max-width: 640px) {
+    .page-header { padding-right: 0; padding-top: 64px; }
+    .brand-logo { left: 0; right: auto; width: 160px; }
+  }
+
+  .layout {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(300px, 360px) 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 820px) {
+    body { padding: 28px 16px 48px; }
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .input-panel,
+  .result-card,
+  .empty-state,
+  .totals-card,
+  .info-strip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .input-panel {
+    overflow: hidden;
+    position: sticky;
+    top: 20px;
+  }
+
+  @media (max-width: 820px) {
+    .input-panel { position: static; }
+  }
+
+  .panel-label {
+    padding: 16px 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-soft);
+  }
+
+  .field-group {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 7px; }
+
+  .field label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #344054;
+  }
+
+  .field input,
+  .field select {
+    background: #ffffff;
+    border: 1px solid var(--border-lit);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    padding: 11px 12px;
+    width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+    min-height: 42px;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--bstc);
+    box-shadow: 0 0 0 4px rgba(33, 170, 255, 0.14);
+  }
+
+  .field input::placeholder { color: #98a2b3; }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2px 0;
+  }
+
+  .price-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 420px) {
+    .price-row { grid-template-columns: 1fr; }
+  }
+
+  .pfx-wrap { position: relative; }
+  .pfx-wrap .pfx {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--muted);
+    pointer-events: none;
+    font-weight: 600;
+  }
+  .pfx-wrap input { padding-left: 28px; }
+
+  .taper-info {
+    background: rgba(33, 170, 255, 0.07);
+    border: 1px solid rgba(33, 170, 255, 0.22);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 11.5px;
+    color: #34374c;
+    line-height: 1.65;
+  }
+
+  .taper-info strong {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--bstc);
+    margin-bottom: 6px;
+  }
+
+  .taper-info span {
+    display: block;
+    padding: 2px 0;
+  }
+
+  .calc-btn {
+    margin: 0 20px 20px;
+    width: calc(100% - 40px);
+    padding: 13px 16px;
+    background: var(--bstc);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 10px 22px rgba(33, 170, 255, 0.24);
+  }
+
+  .calc-btn:hover { background: #34374c; }
+  .calc-btn:active { transform: translateY(1px); box-shadow: none; }
+
+  .error-box {
+    margin: 0 20px 14px;
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--error);
+    display: none;
+    line-height: 1.55;
+  }
+  .error-box.show { display: block; }
+
+  .results-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .empty-state {
+    padding: 64px 28px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .empty-state .icon { font-size: 30px; margin-bottom: 12px; opacity: 0.45; }
+  .empty-state strong { color: var(--text); }
+
+  /* Info strip */
+  .info-strip { display: none; }
+
+  .info-row {
+    padding: 12px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .info-row:last-child { border-bottom: none; }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .i-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .i-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* Result cards */
+  .result-card { overflow: hidden; }
+
+  .result-card.bstc-card {
+    border-left: 5px solid var(--bstc);
+    box-shadow: 0 14px 36px rgba(33, 170, 255, 0.14);
+    border-top: 1px solid var(--border);
+  }
+
+  .result-card.bstc-card .card-header {
+    background: linear-gradient(90deg, var(--bstc-soft), var(--surface-soft));
+  }
+
+  .result-card.bstc-card .metric {
+    border-color: var(--bstc-border);
+  }
+
+  .result-card.bstc-card .m-value { color: var(--bstc); }
+
+  .card-header {
+    padding: 17px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-soft);
+  }
+
+  @media (max-width: 640px) {
+    .card-header { align-items: flex-start; flex-direction: column; }
+    .card-body { grid-template-columns: 1fr !important; }
+  }
+
+  .card-title {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  .card-badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #475467;
+    text-transform: uppercase;
+    padding: 5px 9px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: #ffffff;
+    white-space: nowrap;
+  }
+
+  .card-body {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .metric {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #ffffff;
+  }
+
+  .m-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .m-value {
+    font-size: clamp(24px, 3vw, 34px);
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .m-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  /* Taper breakdown section */
+  .taper-breakdown {
+    margin: 0 20px 18px;
+    border: 1px solid var(--bstc-border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .tb-header {
+    padding: 9px 14px;
+    background: var(--bstc-soft);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--bstc);
+    border-bottom: 1px solid var(--bstc-border);
+  }
+
+  .tb-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 12px;
+    padding: 9px 14px;
+    font-size: 12.5px;
+    border-bottom: 1px solid #ede9f6;
+    align-items: center;
+  }
+
+  .tb-row:last-child { border-bottom: none; }
+
+  .tb-band { color: var(--text); font-weight: 600; }
+  .tb-calc { color: var(--muted); font-size: 11.5px; font-family: 'DM Mono', monospace; }
+  .tb-result { color: var(--bstc); font-weight: 700; font-family: 'DM Mono', monospace; text-align: right; }
+  .tb-row.inactive .tb-band,
+  .tb-row.inactive .tb-calc,
+  .tb-row.inactive .tb-result { color: #c0c8d4; }
+
+  .tb-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(33,170,255,0.06);
+    border-top: 1px solid var(--bstc-border);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--bstc);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Totals card */
+  .totals-card {
+    border-color: #b8c7d8;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    box-shadow: var(--shadow);
+  }
+
+  .t-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .t-value {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 4vw, 42px);
+    color: var(--text);
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+
+  .t-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .period-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    font-weight: 700;
+    background: rgba(33, 170, 255, 0.10);
+    color: var(--bstc);
+    border: 1px solid var(--bstc-border);
+  }
+
+
+  /* Client-facing result summary */
+  .client-summary {
+    background: linear-gradient(135deg, #ffffff 0%, #f7f3ff 100%);
+    border: 1px solid var(--bstc-border);
+    border-left: 5px solid var(--bstc);
+    border-radius: var(--radius);
+    box-shadow: 0 18px 45px rgba(33, 170, 255, 0.14);
+    overflow: hidden;
+  }
+
+  .summary-header {
+    padding: 18px 22px 12px;
+    border-bottom: 1px solid rgba(33, 170, 255, 0.22);
+  }
+
+  .summary-eyebrow {
+    display: inline-flex;
+    margin-bottom: 8px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(33, 170, 255, 0.10);
+    border: 1px solid var(--bstc-border);
+    color: var(--bstc);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .summary-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: clamp(18px, 2.4vw, 24px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--text);
+  }
+
+  .summary-logo {
+    width: 150px;
+    height: auto;
+    object-fit: contain;
+    flex: 0 0 auto;
+  }
+
+  @media (max-width: 640px) {
+    .summary-title { align-items: flex-start; flex-direction: column; }
+    .summary-logo { width: 138px; }
+  }
+
+  .summary-body {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .hero-value {
+    background: #ffffff;
+    border: 1px solid rgba(33, 170, 255, 0.28);
+    border-radius: 13px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 150px;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .hero-amount {
+    margin-top: 8px;
+    font-size: clamp(42px, 6vw, 64px);
+    line-height: 0.95;
+    letter-spacing: -0.06em;
+    font-weight: 800;
+    color: var(--bstc);
+  }
+
+  .hero-note {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .summary-item {
+    background: rgba(255,255,255,0.78);
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    padding: 13px 14px;
+    min-height: 92px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .summary-item .s-label {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  .summary-item .s-value {
+    display: block;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .client-narrative {
+    padding: 0 22px 20px;
+    font-size: 13px;
+    color: #475467;
+    line-height: 1.65;
+  }
+
+  .professional-note {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 15px 18px;
+    color: #475467;
+    font-size: 12.5px;
+    line-height: 1.6;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .professional-note strong { color: var(--text); }
+
+  details.methodology {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  details.methodology summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 15px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: var(--surface-soft);
+    border-bottom: 1px solid var(--border);
+  }
+
+  details.methodology summary::-webkit-details-marker { display: none; }
+  details.methodology summary::after { content: '+'; float: right; font-size: 16px; line-height: 1; color: var(--bstc); }
+  details.methodology[open] summary::after { content: '-'; }
+
+  details.methodology .taper-breakdown {
+    margin: 18px;
+  }
+
+  @media (max-width: 980px) {
+    .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+  }
+
+  select option { background: #ffffff; color: var(--text); }
+
+  /* Scheme tabs */
+  .scheme-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 14px 20px 4px;
+  }
+  .scheme-tab {
+    border: 1px solid var(--border-lit);
+    background: #ffffff;
+    border-radius: 9px;
+    padding: 9px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475467;
+    text-align: center;
+    cursor: pointer;
+    line-height: 1.3;
+    transition: all 0.15s;
+  }
+  .scheme-tab .st-sub { display: block; font-size: 9.5px; font-weight: 600; color: #98a2b3; margin-top: 2px; letter-spacing: 0.01em; }
+  .scheme-tab:hover { border-color: var(--bstc); }
+  .scheme-tab.active {
+    background: var(--bstc);
+    border-color: var(--bstc);
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(33,170,255,0.28);
+  }
+  .scheme-tab.active .st-sub { color: rgba(255,255,255,0.85); }
+
+  @media (max-width: 480px) {
+    .scheme-tabs { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Eligibility checklist */
+  .elig-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .elig-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: 12px;
+    color: #344054;
+    line-height: 1.45;
+    cursor: pointer;
+  }
+  .elig-item input[type="checkbox"] {
+    margin-top: 2px;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--bstc);
+    flex: 0 0 auto;
+    cursor: pointer;
+  }
+
+  /* Conflict / verification flag banners */
+  .flag-banner {
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 11.5px;
+    line-height: 1.6;
+    margin: 0 20px 16px;
+  }
+  .flag-banner.warn {
+    background: rgba(180,83,9,0.07);
+    border: 1px solid rgba(180,83,9,0.28);
+    color: #b45309;
+  }
+  .flag-banner.info {
+    background: rgba(33,170,255,0.07);
+    border: 1px solid rgba(33,170,255,0.22);
+    color: #34374c;
+  }
+  .flag-banner strong { display: block; margin-bottom: 3px; }
+
+  .result-flag {
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    font-weight: 600;
+  }
+  .result-flag.warn {
+    background: rgba(180,83,9,0.07);
+    border: 1px solid rgba(180,83,9,0.28);
+    color: #b45309;
+  }
+  .result-flag.fail {
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
+    color: var(--error);
+  }
+
+</style>
+
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:_dlc_DocId msdt:dt="string">TEST-648909649-40010</mso:_dlc_DocId>
+<mso:_dlc_DocIdItemGuid msdt:dt="string">fa89c3dc-753e-482a-aa62-c71ce314ce9d</mso:_dlc_DocIdItemGuid>
+<mso:_dlc_DocIdUrl msdt:dt="string">https://northmoregordon.sharepoint.com/sites/Testing/_layouts/15/DocIdRedir.aspx?ID=TEST-648909649-40010, TEST-648909649-40010</mso:_dlc_DocIdUrl>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+</head>
+<body>
+
+<div class="page-header">
+  <img class="brand-logo" src="data:image/png;base64,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" alt="Northmore Gordon logo">
+  <h2>Battery STC &amp; PDRS BESS Calculator</h2>
+</div>
+
+<div class="layout">
+
+  <div class="input-panel">
+    <div class="panel-label">Select Scheme / Activity</div>
+    <div class="scheme-tabs">
+      <div class="scheme-tab active" data-scheme="bstc" onclick="switchScheme('bstc')">Battery STC</div>
+      <div class="scheme-tab" data-scheme="bess3" onclick="switchScheme('bess3')">BESS3</div>
+      <div class="scheme-tab" data-scheme="bess4" onclick="switchScheme('bess4')">BESS4</div>
+      <div class="scheme-tab" data-scheme="bess5" onclick="switchScheme('bess5')">BESS5</div>
+    </div>
+
+    <div class="panel-label" id="params-label">Battery Installation Parameters</div>
+
+    <!-- BSTC (Commonwealth) field group -->
+    <div class="field-group" id="fg-bstc">
+
+      <div class="field">
+        <label>Installation Date</label>
+        <input type="date" id="install-date" min="2026-01-01" max="2030-12-31" />
+        <div id="factor-preview" style="display:none; margin-top:6px; padding:8px 12px; background:rgba(33,170,255,0.08); border:1px solid rgba(33,170,255,0.22); border-radius:8px; font-size:12px; color:#34374c; font-weight:600;"></div>
+      </div>
+
+      <div class="field">
+        <label>Nominal Battery Capacity (kWh)</label>
+        <input type="number" id="nominal-kwh" min="0.1" step="0.1" placeholder="e.g. 15.0" />
+      </div>
+
+      <div class="field">
+        <label>Usable Battery Capacity (kWh)</label>
+        <input type="number" id="battery-kwh" min="0.1" step="0.1" placeholder="e.g. 13.5" />
+      </div>
+
+      <div class="taper-info">
+        <strong>Taper Schedule (from 1 May 2026)</strong>
+        <span>0–14 kWh → STC factor at <strong>100%</strong></span>
+        <span>14–28 kWh → STC factor at <strong>60%</strong> on marginal kWh</span>
+        <span>28–50 kWh → STC factor at <strong>15%</strong> on marginal kWh</span>
+        <span style="margin-top:4px;color:#6b6860;font-size:11px;">Eligible nominal battery capacity range: 5–100 kWh. STCs can only be claimed for the first 50 kWh of usable capacity. No zone rating or deeming period applies.</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label>BSTC Spot Price</label>
+        <div class="pfx-wrap">
+          <span class="pfx">$</span>
+          <input type="number" id="bstc-price" min="0" step="0.01" placeholder="0.00" />
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BESS3 field group -->
+    <div class="field-group" id="fg-bess3" style="display:none;">
+      <div class="field">
+        <label>Implementation Date</label>
+        <input type="date" id="b3-date" min="2026-09-01" max="2035-12-31" />
+      </div>
+      <div class="field">
+        <label>Number of Individual Dwellings</label>
+        <input type="number" id="b3-dwellings" min="4" step="1" placeholder="e.g. 6" />
+      </div>
+      <div class="field">
+        <label>Nominal Battery Capacity (kWh)</label>
+        <input type="number" id="b3-kwh" min="22.3" max="222.2" step="0.1" placeholder="e.g. 29.0" />
+      </div>
+      <div class="field">
+        <label>Battery Inverter Output (kW)</label>
+        <input type="number" id="b3-inverter" min="0.1" step="0.1" placeholder="e.g. 5.0" />
+      </div>
+      <div class="field">
+        <label>New Solar PV installed within 90 days of battery?</label>
+        <select id="b3-solar90">
+          <option value="yes">Yes</option>
+          <option value="no">No / more than 90 days</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Distribution Network Area</label>
+        <select id="b3-dnsp">
+          <option value="1.04">Ausgrid (NLF 1.04)</option>
+          <option value="1.05">Endeavour Energy (NLF 1.05)</option>
+          <option value="1.05">Essential Energy (NLF 1.05)</option>
+        </select>
+      </div>
+      <div class="divider"></div>
+      <div class="field">
+        <label>PRC Spot Price</label>
+        <div class="pfx-wrap">
+          <span class="pfx">$</span>
+          <input type="number" id="b3-price" min="0" step="0.01" placeholder="0.00" />
+        </div>
+      </div>
+
+      <div class="taper-info">
+        <strong>BESS3 equipment thresholds</strong>
+        <span>Usable Battery Capacity (Nominal × 90%): <strong>&gt;20 – ≤200 kWh</strong></span>
+        <span>Capacity must not exceed <strong>6×</strong> Battery Inverter Output</span>
+        <span>Internet-connectable and DRA-controllable; ≥10yr warranty, 70% capacity retention at 10yr</span>
+        <span style="margin-top:4px;color:#6b6860;font-size:11px;">Firmness Factor 1.0 · Lifetime 15 years (Table A6 / Activity Definition BESS3, PDRS Rule)</span>
+      </div>
+
+      <div class="elig-list">
+        <label class="elig-item"><input type="checkbox" id="b3-e1"> Site is an Apartment Building comprising not less than 4 individual dwellings</label>
+        <label class="elig-item"><input type="checkbox" id="b3-e2"> No existing BESS installed at the same NMI(s)</label>
+        <label class="elig-item"><input type="checkbox" id="b3-e3"> Equipment listed on approved product list; installed outdoors, Behind the Meter, per AS/NZS 5139</label>
+        <label class="elig-item"><input type="checkbox" id="b3-e4"> Installed by approved installer with SAA Grid-Connected Battery Storage accreditation; all planning/network approvals received</label>
+      </div>
+    </div>
+
+    <!-- BESS4 field group -->
+    <div class="field-group" id="fg-bess4" style="display:none;">
+      <div class="field">
+        <label>Implementation Date</label>
+        <input type="date" id="b4-date" min="2026-09-01" max="2035-12-31" />
+      </div>
+      <div class="field">
+        <label>Nominal Battery Capacity (kWh)</label>
+        <input type="number" id="b4-kwh" min="22.3" max="222.2" step="0.1" placeholder="e.g. 106.7" />
+      </div>
+      <div class="field">
+        <label>Battery Inverter Output (kW)</label>
+        <input type="number" id="b4-inverter" min="0.1" step="0.1" placeholder="e.g. 20" />
+      </div>
+      <div class="field">
+        <label>New Solar PV installed within 90 days of battery?</label>
+        <select id="b4-solar90">
+          <option value="yes">Yes</option>
+          <option value="no">No / more than 90 days</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Distribution Network Area</label>
+        <select id="b4-dnsp">
+          <option value="1.04">Ausgrid (NLF 1.04)</option>
+          <option value="1.05">Endeavour Energy (NLF 1.05)</option>
+          <option value="1.05">Essential Energy (NLF 1.05)</option>
+        </select>
+      </div>
+      <div class="divider"></div>
+      <div class="field">
+        <label>PRC Spot Price</label>
+        <div class="pfx-wrap">
+          <span class="pfx">$</span>
+          <input type="number" id="b4-price" min="0" step="0.01" placeholder="0.00" />
+        </div>
+      </div>
+
+      <div class="taper-info">
+        <strong>BESS4 equipment thresholds</strong>
+        <span>Usable Battery Capacity (Nominal × 90%): <strong>&gt;20 – ≤200 kWh</strong></span>
+        <span>Capacity must not exceed <strong>6×</strong> Battery Inverter Output</span>
+        <span>Internet-connectable and DRA-controllable; ≥10yr warranty, 70% capacity retention at 10yr</span>
+        <span style="margin-top:4px;color:#6b6860;font-size:11px;">Firmness Factor 1.0 · Lifetime 15 years (Table A6 / Activity Definition BESS4, PDRS Rule)</span>
+      </div>
+
+
+      <div class="elig-list">
+        <label class="elig-item"><input type="checkbox" id="b4-e1"> Site is not a Residential Building or a Data Centre</label>
+        <label class="elig-item"><input type="checkbox" id="b4-e2"> No prior BESS4 or BESS5 Implementation at this Site</label>
+        <label class="elig-item"><input type="checkbox" id="b4-e3"> Equipment listed on approved product list; installed Behind the Meter per AS/NZS 5139</label>
+        <label class="elig-item"><input type="checkbox" id="b4-e4"> Installed by approved installer with SAA accreditation; smoke alarm (AS 3786) if installed indoors in a Class 3 building</label>
+      </div>
+    </div>
+
+    <!-- BESS5 field group -->
+    <div class="field-group" id="fg-bess5" style="display:none;">
+      <div class="field">
+        <label>Implementation Date</label>
+        <input type="date" id="b5-date" min="2026-09-01" max="2035-12-31" />
+      </div>
+      <div class="field">
+        <label>Nominal Battery Capacity (kWh)</label>
+        <input type="number" id="b5-kwh" min="222.3" max="33333.3" step="0.1" placeholder="e.g. 555.6" />
+      </div>
+      <div class="field">
+        <label>Battery Inverter Output (kW)</label>
+        <input type="number" id="b5-inverter" min="0.1" step="0.1" placeholder="e.g. 125" />
+      </div>
+      <div class="field">
+        <label>New Solar PV installed within 90 days of battery?</label>
+        <select id="b5-solar90">
+          <option value="yes">Yes</option>
+          <option value="no">No / more than 90 days</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Distribution Network Area</label>
+        <select id="b5-dnsp">
+          <option value="1.04">Ausgrid (NLF 1.04)</option>
+          <option value="1.05">Endeavour Energy (NLF 1.05)</option>
+          <option value="1.05">Essential Energy (NLF 1.05)</option>
+        </select>
+      </div>
+      <div class="divider"></div>
+      <div class="field">
+        <label>PRC Spot Price</label>
+        <div class="pfx-wrap">
+          <span class="pfx">$</span>
+          <input type="number" id="b5-price" min="0" step="0.01" placeholder="0.00" />
+        </div>
+      </div>
+
+      <div class="taper-info">
+        <strong>BESS5 equipment thresholds</strong>
+        <span>Usable Battery Capacity (Nominal × 90%): <strong>&gt;200 – ≤30,000 kWh</strong></span>
+        <span>Capacity must not exceed <strong>6×</strong> Battery Inverter Output; UL9540A tested</span>
+        <span>Internet-connectable and DRA-controllable; capacity recorded in manner specified by Scheme Administrator</span>
+        <span style="margin-top:4px;color:#6b6860;font-size:11px;">Firmness Factor 1.0 · Lifetime 15 years (Table A6 / Activity Definition BESS5, PDRS Rule)</span>
+      </div>
+
+
+      <div class="elig-list">
+        <label class="elig-item"><input type="checkbox" id="b5-e1"> Site is not a Residential Building or a Data Centre</label>
+        <label class="elig-item"><input type="checkbox" id="b5-e2"> No prior BESS4 or BESS5 Implementation at this Site</label>
+        <label class="elig-item"><input type="checkbox" id="b5-e3"> Equipment tested to UL9540A; capacity recorded per Scheme Administrator method</label>
+        <label class="elig-item"><input type="checkbox" id="b5-e4"> Installed by suitably licensed person; all planning/network approvals received</label>
+      </div>
+    </div>
+
+    <div id="error-box" class="error-box"></div>
+    <button class="calc-btn" id="calc-btn" onclick="calculate()">Calculate BSTCs</button>
+  </div>
+
+  <div class="results-panel" id="results-panel">
+    <div class="empty-state">
+      <div class="icon">🔋</div>
+      Enter installation details and click<br><strong id="empty-cta">Calculate BSTCs</strong> to see results.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Period schedule: [startDate (inclusive), endDate (inclusive), label, factor]
+// Dates as YYYY-MM-DD strings for easy comparison
+const PERIOD_SCHEDULE = [
+  { from: '2026-01-01', to: '2026-04-30', label: 'Jan–Apr 2026', factor: 8.4 },
+  { from: '2026-05-01', to: '2026-12-31', label: 'May–Dec 2026', factor: 6.8 },
+  { from: '2027-01-01', to: '2027-06-30', label: 'Jan–Jun 2027', factor: 5.7 },
+  { from: '2027-07-01', to: '2027-12-31', label: 'Jul–Dec 2027', factor: 5.2 },
+  { from: '2028-01-01', to: '2028-06-30', label: 'Jan–Jun 2028', factor: 4.6 },
+  { from: '2028-07-01', to: '2028-12-31', label: 'Jul–Dec 2028', factor: 4.1 },
+  { from: '2029-01-01', to: '2029-06-30', label: 'Jan–Jun 2029', factor: 3.6 },
+  { from: '2029-07-01', to: '2029-12-31', label: 'Jul–Dec 2029', factor: 3.1 },
+  { from: '2030-01-01', to: '2030-06-30', label: 'Jan–Jun 2030', factor: 2.6 },
+  { from: '2030-07-01', to: '2030-12-31', label: 'Jul–Dec 2030', factor: 2.1 },
+];
+
+function getPeriod(dateStr) {
+  if (!dateStr) return null;
+  for (const p of PERIOD_SCHEDULE) {
+    if (dateStr >= p.from && dateStr <= p.to) return p;
+  }
+  return null;
+}
+
+function fmt(n, d=0) {
+  return n.toLocaleString('en-AU', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+function fmtD(n) {
+  return '$' + n.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtF(n) {
+  return n.toLocaleString('en-AU', { minimumFractionDigits: 1, maximumFractionDigits: 4 });
+}
+function fmtDate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+// Live factor preview on date change
+document.addEventListener('DOMContentLoaded', function() {
+  const dateInput = document.getElementById('install-date');
+  const preview   = document.getElementById('factor-preview');
+  dateInput.addEventListener('change', function() {
+    const p = getPeriod(this.value);
+    if (p) {
+      preview.style.display = 'block';
+      preview.textContent = `Period: ${p.label}  ·  STC Factor: ${p.factor}`;
+    } else if (this.value) {
+      preview.style.display = 'block';
+      preview.style.color = '#b42318';
+      preview.style.background = '#fff1f0';
+      preview.style.borderColor = '#fecdca';
+      preview.textContent = 'Date is outside the eligible BSTC period (1 Jan 2026 – 31 Dec 2030).';
+    } else {
+      preview.style.display = 'none';
+    }
+  });
+});
+
+function calculateBSTC() {
+  const errBox = document.getElementById('error-box');
+  errBox.classList.remove('show');
+  errBox.innerHTML = '';
+
+  const dateStr = document.getElementById('install-date').value;
+  const nominalRaw = parseFloat(document.getElementById('nominal-kwh').value);
+  const kwhRaw     = parseFloat(document.getElementById('battery-kwh').value);
+  const spotRaw = parseFloat(document.getElementById('bstc-price').value);
+
+  const errs = [];
+  if (!dateStr)                            errs.push('Enter an installation date.');
+  const period = dateStr ? getPeriod(dateStr) : null;
+  if (dateStr && !period)                  errs.push('Installation date is outside the eligible BSTC period (1 Jan 2026 – 31 Dec 2030).');
+  if (isNaN(nominalRaw) || nominalRaw <= 0) {
+    errs.push('Enter a valid nominal battery capacity in kWh.');
+  } else if (nominalRaw < 5 || nominalRaw > 100) {
+    errs.push('Ineligible: nominal battery capacity must be between 5 kWh and 100 kWh.');
+  }
+  if (isNaN(kwhRaw) || kwhRaw <= 0) {
+    errs.push('Enter a valid usable battery capacity in kWh.');
+  }
+
+  if (isNaN(spotRaw) || spotRaw < 0)       errs.push('Enter a valid BSTC spot price (use 0 if unknown).');
+
+  if (errs.length) {
+    errBox.innerHTML = errs.map(e => `• ${e}`).join('<br>');
+    errBox.classList.add('show');
+    return;
+  }
+
+  const clipped = kwhRaw > 50;
+  const kwh = Math.min(kwhRaw, 50);
+  const { label: periodLabel, factor: F } = period;
+
+  // Taper bands
+  const band1_kwh  = Math.min(kwh, 14);
+  const band2_kwh  = Math.max(0, Math.min(kwh, 28) - 14);
+  const band3_kwh  = Math.max(0, Math.min(kwh, 50) - 28);
+
+  const band1_raw  = band1_kwh * F;
+  const band2_raw  = band2_kwh * F * 0.60;
+  const band3_raw  = band3_kwh * F * 0.15;
+
+  const totalRaw   = band1_raw + band2_raw + band3_raw;
+  const bstcCount  = Math.floor(totalRaw);
+  const bstcValue  = bstcCount * spotRaw;
+
+  // Determine which bands are active
+  const b2active = band2_kwh > 0;
+  const b3active = band3_kwh > 0;
+
+  let html = `
+  <div class="client-summary">
+    <div class="summary-header">
+      <div class="summary-title"><span>Battery STC Estimate</span><img class="summary-logo" src="${document.querySelector('.brand-logo').src}" alt="Northmore Gordon logo"></div>
+    </div>
+    <div class="summary-body">
+      <div class="summary-grid">
+        <div class="summary-item"><span class="s-label">Installation Date</span><span class="s-value">${fmtDate(dateStr)}</span></div>
+        <div class="summary-item"><span class="s-label">Nominal Capacity</span><span class="s-value">${fmtF(nominalRaw)} kWh</span></div>
+        <div class="summary-item"><span class="s-label">Usable Capacity</span><span class="s-value">${clipped ? `${fmtF(kwhRaw)} kWh<br><span style="color:#b45309;font-size:11px;">Calculated at 50 kWh cap</span>` : `${fmtF(kwh)} kWh`}</span></div>
+        <div class="summary-item"><span class="s-label">Eligible BSTCs</span><span class="s-value">${fmt(bstcCount)} BSTCs</span></div>
+        <div class="summary-item"><span class="s-label">STC Factor</span><span class="s-value">${F}<br><span style="color:#667085;font-size:12px;">${periodLabel}</span></span></div>
+        <div class="summary-item"><span class="s-label">Spot Price incl. fees</span><span class="s-value">${fmtD(spotRaw)} / BSTC</span></div>
+      </div>
+      <div class="hero-value">
+        <span class="hero-label">Estimated Net Payment to Customer</span>
+        <div class="hero-amount">${fmtD(bstcValue)}</div>
+      </div>
+    </div>
+    <div class="client-narrative">
+      <strong>Important:</strong> The estimated net payment shown is based on the nominated BSTC spot price (including fees) entered above. Final BSTC creation, assignment value and payment are subject to system eligibility, installation compliance requirements and applicable Clean Energy Regulator requirements.
+    </div>
+  </div>
+
+  ${clipped ? `<div style="padding:14px 16px;border:1px solid rgba(180,83,9,0.28);border-radius:14px;background:rgba(180,83,9,0.07);color:#b45309;font-size:12.5px;font-weight:600;line-height:1.55;">Entered capacity (${fmtF(kwhRaw)} kWh) exceeds the 50 kWh BSTC claim cap. This estimate has been calculated using the first 50 kWh of usable capacity only. Usable capacity above 50 kWh does not generate additional BSTCs. Eligibility is assessed separately against the entered nominal battery capacity.</div>` : ''}
+
+
+  <details class="methodology">
+    <summary>Certificate Calculation Methodology</summary>
+    <div class="taper-breakdown">
+      <div class="tb-header">Taper Band Breakdown</div>
+      <div class="tb-row">
+        <span class="tb-band">Band 1 · 0-14 kWh · 100%</span>
+        <span class="tb-calc">${fmtF(band1_kwh)} kWh × ${F} × 100% = ${fmtF(band1_raw)}</span>
+        <span class="tb-result">${fmtF(band1_raw)}</span>
+      </div>
+      <div class="tb-row${b2active ? '' : ' inactive'}">
+        <span class="tb-band">Band 2 · 14-28 kWh · 60%</span>
+        <span class="tb-calc">${b2active ? `${fmtF(band2_kwh)} kWh × ${F} × 60% = ${fmtF(band2_raw)}` : 'Not applicable'}</span>
+        <span class="tb-result">${b2active ? fmtF(band2_raw) : '—'}</span>
+      </div>
+      <div class="tb-row${b3active ? '' : ' inactive'}">
+        <span class="tb-band">Band 3 · 28-50 kWh · 15%</span>
+        <span class="tb-calc">${b3active ? `${fmtF(band3_kwh)} kWh × ${F} × 15% = ${fmtF(band3_raw)}` : 'Not applicable'}</span>
+        <span class="tb-result">${b3active ? fmtF(band3_raw) : '—'}</span>
+      </div>
+      <div class="tb-total">
+        <span>floor(${fmtF(totalRaw)}) = ${fmt(bstcCount)} BSTCs</span>
+        <span>${fmtD(bstcValue)}</span>
+      </div>
+    </div>
+  </details>`
+
+  document.getElementById('results-panel').innerHTML = html;
+}
+
+/* ===================== Multi-scheme dispatch ===================== */
+
+let currentScheme = 'bstc';
+
+const NLF_LABELS = { '1.04': 'Ausgrid', '1.05': 'Endeavour / Essential Energy' };
+
+const SCHEME_META = {
+  bstc:  { label: 'Battery STC Calculator',        btn: 'Calculate BSTCs', panel: 'Battery Installation Parameters', empty: 'Calculate BSTCs' },
+  bess3: { label: 'BESS3 · PRC Calculator (Apartments)',              btn: 'Calculate PRCs', panel: 'BESS3 Implementation Parameters', empty: 'Calculate PRCs' },
+  bess4: { label: 'BESS4 · PRC Calculator (Small/Medium Business)',   btn: 'Calculate PRCs', panel: 'BESS4 Implementation Parameters', empty: 'Calculate PRCs' },
+  bess5: { label: 'BESS5 · PRC Calculator (Commercial/Industrial)',   btn: 'Calculate PRCs', panel: 'BESS5 Implementation Parameters', empty: 'Calculate PRCs' },
+};
+
+function switchScheme(scheme) {
+  currentScheme = scheme;
+  document.querySelectorAll('.scheme-tab').forEach(t => t.classList.toggle('active', t.dataset.scheme === scheme));
+  ['bstc','bess3','bess4','bess5'].forEach(s => {
+    document.getElementById('fg-' + s).style.display = (s === scheme) ? 'flex' : 'none';
+  });
+  const meta = SCHEME_META[scheme];
+  const paramsLabel = document.getElementById('params-label');
+  paramsLabel.textContent = meta.panel;
+  paramsLabel.style.display = (scheme === 'bstc') ? 'block' : 'none';
+  document.getElementById('calc-btn').textContent = meta.btn;
+  const emptyCta = document.getElementById('empty-cta');
+  if (emptyCta) emptyCta.textContent = meta.empty;
+  document.getElementById('error-box').classList.remove('show');
+  document.getElementById('error-box').innerHTML = '';
+  document.getElementById('results-panel').innerHTML = `
+    <div class="empty-state">
+      <div class="icon">🔋</div>
+      Enter installation details and click<br><strong>${meta.btn}</strong> to see results.
+    </div>`;
+}
+
+function calculate() {
+  if (currentScheme === 'bstc') { calculateBSTC(); return; }
+  calculateBESS(currentScheme);
+}
+
+function checklistOk(ids) {
+  return ids.every(id => document.getElementById(id).checked);
+}
+
+function calculateBESS(scheme) {
+  const errBox = document.getElementById('error-box');
+  errBox.classList.remove('show');
+  errBox.innerHTML = '';
+
+  const p = scheme.replace('bess', 'b'); // b3 / b4 / b5
+  const dateStr   = document.getElementById(p + '-date').value;
+  const nominalRaw = parseFloat(document.getElementById(p + '-kwh').value);
+  const kwhRaw     = nominalRaw * 0.90;
+  const invRaw    = parseFloat(document.getElementById(p + '-inverter').value);
+  const solar90   = document.getElementById(p + '-solar90').value === 'yes';
+  const nlf       = parseFloat(document.getElementById(p + '-dnsp').value);
+  const spotRaw   = parseFloat(document.getElementById(p + '-price').value);
+  const dwellings = (scheme === 'bess3') ? parseInt(document.getElementById('b3-dwellings').value) : null;
+
+  const errs = [];
+  if (!dateStr) errs.push('Enter an Implementation Date.');
+  else if (dateStr < '2026-09-01') errs.push('Implementation Date must be on or after 1 September 2026 (BESS3/4/5 commencement).');
+
+  const bandLabel = { bess3: '>20–≤200 kWh', bess4: '>20–≤200 kWh', bess5: '>200–≤30,000 kWh' }[scheme];
+  const bandMin = { bess3: 20, bess4: 20, bess5: 200 }[scheme];
+  const bandMax = { bess3: 200, bess4: 200, bess5: 30000 }[scheme];
+
+  if (isNaN(nominalRaw) || nominalRaw <= 0) errs.push('Enter a valid Nominal Battery Capacity in kWh.');
+  else if (kwhRaw <= bandMin || kwhRaw > bandMax) errs.push(`Ineligible: derived Usable Battery Capacity (Nominal × 90%) must be ${bandLabel} for ${scheme.toUpperCase()}.`);
+
+  if (isNaN(invRaw) || invRaw <= 0) errs.push('Enter a valid Battery Inverter Output in kW.');
+  else if (!isNaN(nominalRaw) && kwhRaw > invRaw * 6) errs.push('Ineligible: derived Usable Battery Capacity (Nominal × 90%) must not exceed 6× the Battery Inverter Output.');
+
+  if (scheme === 'bess3') {
+    if (isNaN(dwellings) || dwellings < 4) errs.push('Enter a valid number of dwellings (minimum 4).');
+  }
+
+  if (isNaN(spotRaw) || spotRaw < 0) errs.push('Enter a valid PRC spot price (use 0 if unknown).');
+
+  const eligIds = {
+    bess3: ['b3-e1','b3-e2','b3-e3','b3-e4'],
+    bess4: ['b4-e1','b4-e2','b4-e3','b4-e4'],
+    bess5: ['b5-e1','b5-e2','b5-e3','b5-e4'],
+  }[scheme];
+  if (!checklistOk(eligIds)) errs.push('Confirm all eligibility requirements below before calculating — each must be checked.');
+
+  if (errs.length) {
+    errBox.innerHTML = errs.map(e => `• ${e}`).join('<br>');
+    errBox.classList.add('show');
+    return;
+  }
+
+  // Battery Capacity (as defined per Activity Definition) and Demand Shifting Component
+  let batteryCapacity, dsc, formulaLabel, rateLabel;
+  const fourHrInv = invRaw * 4;
+
+  if (scheme === 'bess3') {
+    const dwellingCap = dwellings * 5;
+    batteryCapacity = Math.min(kwhRaw, dwellingCap, fourHrInv);
+    const rate = solar90 ? 0.12 : 0.0853;
+    dsc = batteryCapacity * rate;
+    formulaLabel = solar90 ? 'BESS3.2' : 'BESS3.3';
+    rateLabel = `${rate} kW/kWh`;
+  } else if (scheme === 'bess4') {
+    batteryCapacity = Math.min(kwhRaw, fourHrInv);
+    const baseRate = solar90 ? 0.1 : 0.067;
+    if (batteryCapacity <= 50) {
+      dsc = batteryCapacity * baseRate * 0.5;
+      formulaLabel = solar90 ? 'BESS4.2A' : 'BESS4.3A';
+    } else if (batteryCapacity <= 100) {
+      dsc = (50 * baseRate * 0.5) + ((batteryCapacity - 50) * baseRate * 0.7);
+      formulaLabel = solar90 ? 'BESS4.2B' : 'BESS4.3B';
+    } else {
+      dsc = batteryCapacity * baseRate;
+      formulaLabel = solar90 ? 'BESS4.2C' : 'BESS4.3C';
+    }
+    rateLabel = `${baseRate} kW/kWh`;
+  } else { // bess5
+    batteryCapacity = Math.min(kwhRaw, 10000, fourHrInv);
+    const rate = solar90 ? 0.1 : 0.067;
+    dsc = batteryCapacity * rate;
+    formulaLabel = solar90 ? 'BESS5.2' : 'BESS5.3';
+    rateLabel = `${rate} kW/kWh`;
+  }
+
+  const firmnessFactor = 1;
+  const pdsc = dsc * firmnessFactor;      // Peak Demand Shifting Capacity
+  const lifetime = 15;
+  const summerDuration = 6;
+  const pdrc = pdsc * summerDuration * lifetime; // Equation 2b
+  const totalRaw = pdrc * nlf * 10;              // Equation 1
+  const prcCount = Math.floor(totalRaw);
+  const prcValue = prcCount * spotRaw;
+
+  const activityLabel = { bess3: 'BESS3', bess4: 'BESS4', bess5: 'BESS5' }[scheme];
+  const siteLabel = { bess3: 'Apartment Building', bess4: 'Small/Medium Business', bess5: 'Commercial/Industrial' }[scheme];
+  const solarConfiguration = solar90
+    ? 'With New Solar PV<br><span style="color:#667085;font-size:12px;">Installed within 90 days</span>'
+    : 'Without New Solar PV<br><span style="color:#667085;font-size:12px;">Or installed outside 90 days</span>';
+
+  let html = `
+  <div class="client-summary">
+    <div class="summary-header">
+      <div class="summary-title"><span>${activityLabel} Peak Reduction Certificate Estimate</span><img class="summary-logo" src="${document.querySelector('.brand-logo').src}" alt="Northmore Gordon logo"></div>
+    </div>
+    <div class="summary-body">
+      <div class="summary-grid">
+        <div class="summary-item"><span class="s-label">Implementation Date</span><span class="s-value">${fmtDate(dateStr)}</span></div>
+        <div class="summary-item"><span class="s-label">Site Type</span><span class="s-value">${siteLabel}</span></div>
+        <div class="summary-item"><span class="s-label">Solar Configuration</span><span class="s-value">${solarConfiguration}</span></div>
+        <div class="summary-item"><span class="s-label">Nominal Capacity</span><span class="s-value">${fmtF(nominalRaw)} kWh</span></div>
+        <div class="summary-item"><span class="s-label">Usable Capacity</span><span class="s-value">${fmtF(kwhRaw)} kWh<br><span style="color:#667085;font-size:12px;">90% of nominal</span></span></div>
+        <div class="summary-item"><span class="s-label">Eligible PRCs</span><span class="s-value">${fmt(prcCount)} PRCs</span></div>
+        <div class="summary-item"><span class="s-label">Network Loss Factor</span><span class="s-value">${nlf}<br><span style="color:#667085;font-size:12px;">${NLF_LABELS[String(nlf)] || ''}</span></span></div>
+        <div class="summary-item"><span class="s-label">Spot Price incl. fees</span><span class="s-value">${fmtD(spotRaw)} / PRC</span></div>
+      </div>
+      <div class="hero-value">
+        <span class="hero-label">Estimated Net Payment to Customer</span>
+        <div class="hero-amount">${fmtD(prcValue)}</div>
+      </div>
+    </div>
+    <div class="client-narrative">
+      <strong>Important:</strong> The estimated net payment shown is based on the nominated PRC spot price (including fees) entered above. Final PRC creation, assignment value and payment are subject to system eligibility, Scheme Administrator approved product/installer listing, installation compliance requirements and applicable PDRS Rule requirements. This estimate does not resolve the outstanding solar PV co-installation or minimum co-payment items flagged for this activity — confirm those with the Scheme Administrator before relying on this figure in client-facing advice.
+    </div>
+  </div>
+
+  <details class="methodology">
+    <summary>Certificate Calculation Methodology</summary>
+    <div class="taper-breakdown">
+      <div class="tb-header">${activityLabel} PRC Calculation Steps</div>
+      <div class="tb-row">
+        <span class="tb-band">Battery Capacity (capped)</span>
+        <span class="tb-calc">Nominal ${fmtF(nominalRaw)} kWh × 90% = ${fmtF(kwhRaw)} kWh usable; lesser of applicable caps applied</span>
+        <span class="tb-result">${fmtF(batteryCapacity)} kWh</span>
+      </div>
+      <div class="tb-row">
+        <span class="tb-band">Demand Shifting Component (Eq. ${formulaLabel})</span>
+        <span class="tb-calc">${fmtF(batteryCapacity)} kWh × ${rateLabel}${scheme === 'bess4' && batteryCapacity > 50 ? ' (tiered)' : ''}</span>
+        <span class="tb-result">${fmtF(dsc, 3)} kW</span>
+      </div>
+      <div class="tb-row">
+        <span class="tb-band">Peak Demand Shifting Capacity</span>
+        <span class="tb-calc">${fmtF(dsc, 3)} kW × Firmness Factor ${firmnessFactor}</span>
+        <span class="tb-result">${fmtF(pdsc, 3)} kW</span>
+      </div>
+      <div class="tb-row">
+        <span class="tb-band">Peak Demand Reduction Capacity (Eq. 2b)</span>
+        <span class="tb-calc">${fmtF(pdsc, 3)} kW × ${summerDuration} hrs × ${lifetime} yrs</span>
+        <span class="tb-result">${fmtF(pdrc, 2)} kW</span>
+      </div>
+      <div class="tb-total">
+        <span>floor(${fmtF(pdrc, 2)} × ${nlf} × 10) = ${fmt(prcCount)} PRCs</span>
+        <span>${fmtD(prcValue)}</span>
+      </div>
+    </div>
+  </details>`;
+
+  document.getElementById('results-panel').innerHTML = html;
+}
+</script>
+</body>
+</html>
