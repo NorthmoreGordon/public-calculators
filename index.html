@@ -886,9 +886,9 @@
 
 <!--[if gte mso 9]><xml>
 <mso:CustomDocumentProperties>
-<mso:_dlc_DocId msdt:dt="string">TEST-648909649-40011</mso:_dlc_DocId>
-<mso:_dlc_DocIdItemGuid msdt:dt="string">5db4652f-944d-49dd-96f5-556607b9e866</mso:_dlc_DocIdItemGuid>
-<mso:_dlc_DocIdUrl msdt:dt="string">https://northmoregordon.sharepoint.com/sites/Testing/_layouts/15/DocIdRedir.aspx?ID=TEST-648909649-40011, TEST-648909649-40011</mso:_dlc_DocIdUrl>
+<mso:_dlc_DocId msdt:dt="string">TEST-648909649-40048</mso:_dlc_DocId>
+<mso:_dlc_DocIdItemGuid msdt:dt="string">006c327c-5626-4cb1-9efb-15796cd8f9a0</mso:_dlc_DocIdItemGuid>
+<mso:_dlc_DocIdUrl msdt:dt="string">https://northmoregordon.sharepoint.com/sites/Testing/_layouts/15/DocIdRedir.aspx?ID=TEST-648909649-40048, TEST-648909649-40048</mso:_dlc_DocIdUrl>
 </mso:CustomDocumentProperties>
 </xml><![endif]-->
 </head>
@@ -1579,11 +1579,28 @@ function calculatePublicBess() {
 }
 
 let frameResizeRequest = null;
+let lastFrameHeight = 0;
+
 function sendFrameHeight() {
   if (frameResizeRequest) cancelAnimationFrame(frameResizeRequest);
   frameResizeRequest = requestAnimationFrame(() => {
-    const height = Math.ceil(document.documentElement.scrollHeight);
-    window.parent.postMessage({ type: 'ng-calculator-resize', height }, '*');
+    const bodyStyle = getComputedStyle(document.body);
+    const bottomPadding = parseFloat(bodyStyle.paddingBottom) || 0;
+    const contentElements = [
+      document.querySelector('.page-header'),
+      document.querySelector('.layout')
+    ].filter(Boolean);
+    const contentBottom = Math.max(
+      0,
+      ...contentElements.map((element) => element.getBoundingClientRect().bottom)
+    );
+    const height = Math.ceil(window.scrollY + contentBottom + bottomPadding);
+
+    if (height !== lastFrameHeight) {
+      lastFrameHeight = height;
+      window.parent.postMessage({ type: 'ng-calculator-resize', height }, '*');
+    }
+
     frameResizeRequest = null;
   });
 }
@@ -1594,7 +1611,11 @@ window.addEventListener('resize', () => {
   sendFrameHeight();
 });
 if ('ResizeObserver' in window) {
-  new ResizeObserver(sendFrameHeight).observe(document.body);
+  const frameResizeObserver = new ResizeObserver(sendFrameHeight);
+  const pageHeader = document.querySelector('.page-header');
+  const calculatorLayout = document.querySelector('.layout');
+  if (pageHeader) frameResizeObserver.observe(pageHeader);
+  if (calculatorLayout) frameResizeObserver.observe(calculatorLayout);
 }
 switchScheme('stc');
 </script>
