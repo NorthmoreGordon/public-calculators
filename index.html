@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Battery STC &amp; PDRS BESS Calculator</title>
+<title>Battery STC &amp; BESS Calculator</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 
@@ -36,7 +36,7 @@
       linear-gradient(180deg, #ffffff 0%, var(--bg) 34%);
     color: var(--text);
     font-family: Arial, Helvetica, sans-serif;
-    min-height: 100vh;
+    min-height: 0;
     padding: 42px 22px 64px;
   }
 
@@ -527,7 +527,6 @@
   .summary-title {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 16px;
     font-size: clamp(18px, 2.4vw, 24px);
     font-weight: 700;
@@ -535,16 +534,8 @@
     color: var(--text);
   }
 
-  .summary-logo {
-    width: 150px;
-    height: auto;
-    object-fit: contain;
-    flex: 0 0 auto;
-  }
-
   @media (max-width: 640px) {
     .summary-title { align-items: flex-start; flex-direction: column; }
-    .summary-logo { width: 138px; }
   }
 
   .summary-body {
@@ -687,7 +678,7 @@
   /* Scheme tabs */
   .scheme-tabs {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 6px;
     padding: 14px 20px 4px;
   }
@@ -780,32 +771,141 @@
     color: var(--error);
   }
 
+  .label-with-help {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .help-tip {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 19px;
+    height: 19px;
+    padding: 0;
+    border: 1px solid var(--bstc-border);
+    border-radius: 50%;
+    background: rgba(33, 170, 255, 0.10);
+    color: var(--bstc);
+    font: 700 12px/1 Arial, Helvetica, sans-serif;
+    cursor: help;
+  }
+
+  .help-tip::after {
+    content: attr(data-tip);
+    position: absolute;
+    z-index: 20;
+    left: 50%;
+    bottom: calc(100% + 9px);
+    width: min(270px, 75vw);
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: #101828;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.45;
+    text-align: left;
+    box-shadow: 0 10px 30px rgba(16, 24, 40, 0.22);
+    transform: translate(-50%, 5px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+
+  .help-tip:hover::after,
+  .help-tip:focus::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+  }
+
+  .compact-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .result-metric {
+    min-height: 165px;
+    padding: 22px;
+    border: 1px solid rgba(33, 170, 255, 0.28);
+    border-radius: 13px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .result-metric .metric-label {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .result-metric .metric-value {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin-top: 10px;
+    color: var(--bstc);
+    font-size: clamp(34px, 5vw, 54px);
+    font-weight: 800;
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .result-disclaimer {
+    padding: 0 22px 22px;
+    color: #475467;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+
+  .result-disclaimer strong { color: var(--text); }
+
+  .contact-prompt {
+    display: block;
+    margin-top: 10px;
+    color: var(--bstc);
+    font-weight: 700;
+  }
+
+  @media (max-width: 640px) {
+    .compact-results { grid-template-columns: 1fr; }
+    .result-metric { min-height: 135px; }
+  }
+
 </style>
 
 <!--[if gte mso 9]><xml>
 <mso:CustomDocumentProperties>
-<mso:_dlc_DocId msdt:dt="string">TEST-648909649-40010</mso:_dlc_DocId>
-<mso:_dlc_DocIdItemGuid msdt:dt="string">fa89c3dc-753e-482a-aa62-c71ce314ce9d</mso:_dlc_DocIdItemGuid>
-<mso:_dlc_DocIdUrl msdt:dt="string">https://northmoregordon.sharepoint.com/sites/Testing/_layouts/15/DocIdRedir.aspx?ID=TEST-648909649-40010, TEST-648909649-40010</mso:_dlc_DocIdUrl>
+<mso:_dlc_DocId msdt:dt="string">TEST-648909649-40011</mso:_dlc_DocId>
+<mso:_dlc_DocIdItemGuid msdt:dt="string">5db4652f-944d-49dd-96f5-556607b9e866</mso:_dlc_DocIdItemGuid>
+<mso:_dlc_DocIdUrl msdt:dt="string">https://northmoregordon.sharepoint.com/sites/Testing/_layouts/15/DocIdRedir.aspx?ID=TEST-648909649-40011, TEST-648909649-40011</mso:_dlc_DocIdUrl>
 </mso:CustomDocumentProperties>
 </xml><![endif]-->
 </head>
 <body>
 
 <div class="page-header">
-  <img class="brand-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANYAAAA/CAIAAAATyqEzAAALF0lEQVR4AezcP44cxxkF8IHuIB9AoSgnNAwp5AUcOqBi2TCcMPcBnDMxDEsxGSj0BRRKMHYT2Qp9AOsQ9o/7iEKx+s/0n9np3nELD6Wv3vfqq+qqx5qeXYkf/ff459iBTXfgo9Pxz7EDm+7AYcFNt/+Y/HQ6LHi4YOMdOCy48QEc0x8WPDyw8Q78f1lw480+pu/bgcOCfbtycFfcgcOCV9zsY6q+HTgs2LcrB3fFHTgseMXNPqbq24HDgn27cnBX3IHDglfc7CtP9USmu7AFv//59Ppfp5ffvcMn354gsRYvu2ZbDFcnUBkSqwxrKh9jN9yBy1iwmOPL706vfzr98PM75KkSa/GyfMMu9MlOaYlZzUDD1QkyMLHKQECmeFJH+1R24AIWdPDFHFMem13op3gl5iNmtSmVyRTnxSnFpxQ8NFfYgVUWZBHn7eAXLPSsV4qzFxe3vAVjjyFX3oHlFnTTuJ9WLpcR1WmKsA7/LXN2XcryusVrwRHvYQcWWtDRcs9FHkAdhiul+I911vsvBRW31MRHu88dWGJBh+poP3iedR2GKy784T/raq0YfXf/46+/+A0IumXw8Ldv3nRTl2LUh97ZLzXFDuvMtuDF/ZdNKS589ez0+cfhLtC++vSk4NxCX3/zdu6QuXo+C+YOvD39PAv6lJx+/3FSMHHXuJC/iaeYJpW19ENY5j/VmONRbztT/OGPfwLBgXkW9JZ2dsvY4s2L079/e3r74j3EGIY4O5a/ufyLj0+94lRWSsGzxVWYYuWhJbkIGXEoe/AX3IEZFswVNTI3i8QcPNTIMAwhyxlNqulmFuKGN5Dt1IEmhaFPcTJgU0wjm9vlwrND2NRlBt7hXJxQD9GVAmSUacMgTSEGcY3I1JRSpKTCIwV4AY1Al0aLCZCYBo2g0ZSsUYm14oBYZdNpxSEv0s6x4E9jMzp4FhlTPOQ4g/Ih7G98HCfB0CWYaKl3xZ+dtEyZscva33310kAHML7Xss6DDOj5CZDiAilARonXBQEIAnGBIrVY1/CSjR4JYryAPsAEIWULFKFJVksAyCIQ4AEZJQYwnEcsSFeMSRezElMtmMtpaDKucvBD2YanZKmGrLuZiwzJiJy90lLqzMKvnv8SDLHXfRstc3JOsiJKlg10kc5PUAOpS5k2QYlLFwNmxPz1L39WUxcMRwoKdGkIICRGkFFSYgwIYGS1UgQ1TKebIoLyOJjUR0JkgpWYakGvaEMzzfJfirCUUYm7beaikYoRBVeGvbbjJh3a6PAcQPn7r74MdA1x8CAoUOof3/+dUqCFpOjFkG7akJRqllRTMBoCoCwDxZjuqJHVSjXFFVEBBMWgZf3qi81oFAhWYqoFy+djd77Pf9HlzjO85Ybr1ZkrLnRZxoi9sscmHbMp7HI5Bt0AmcB5JEir69jERSCGlBLMhWpg1P39P7UFIdN9/vyzBGZPoI0go8r6awGNbmR39z/qFlhteAyDajHaGhEkW/ML4kkWzCdjb3WX2WKXcGFvzUIOVbZlPh3sLBTxxQO7nK230Was66dLUJN1fD/smFrWG4+U7dX3ksWXJTtS9uxq7YCXvxp3H7q2zLIgmGTBkbrLrsAUHHKY7IjpmQ9sgX0B+8KIukZdHOWeMGNdfOQ4c/Zp6yH7jLPOtAtWeJFtn2TBfCz2LnHERr36hhz6LG5kpdvrNkZkEakiu2CQi7C3oAOAJmUxDbN5N39gLBWaxZxdbcZqvf/1oim4oDvJgkN15xqoW2eWg+3g2S3rTrGSsftdFyJB5WY95Y+B61P2LDzRWc16gaWCOgtW+/z5ZwZaZ3k0Xbjgn/lJFvT9wKxdzDJQd/gI0zujjRgZkl0eESxO8VO3eHxpSd4EnEeQM05qfLoUpM/AcfH6bJa0YLXl2S3VkzKiBQuUwqxfmAqTLEj3SJj1Kplj612JFPSmkF4kXlb/O8vIiyZxL3KEdcp0hXQeAQHSsQnGQRZBGZjuI7VrVuunM2W1bGfBWSQ+wcp2YwuOrJ5vRrJNauiFWhHm86tt1yo0o7pdew0OrElh8CAoKVbzeoQEvCMBZBEgpaAwJZAqY4vAcJAqMoEsUisGAdQaMQZkC7qkhZUZZdUEZBkiUAQEDciIpQKxUoo0smXdjS0466PcM0P3OZH2qMvzX8zXTfUyqdNbih4PNOIaSHAqUlCndKWgJutYKghJD4lLiwkwglqPgRFSiqBGhi9YrVIZqxXXNVfGG1twZPW9H5f2zh/EepTtaJiS5b8SH8Fud2B7Cw59rR763PSnkOeA+TgSBN397XVwVzbEeOPx3g1evQNv4jCkvyBvFvNqL1hzz6W2t2C9O008ZCMuhCHzKWLg69H/rodmBI6fCbgQisybOEgV5vEC895/+PuVx5tr88rbW3Dk13Rs5H1uwR4ZuGBUhjAfqyV2v7puQRBGiiDx0V5kB7a3oG8kQ5/FntD73FwXugINXAaX3N3Dbz95zpc+F63rFgS6SGUJQHDgIjuwvQU9xshFKDvLUn4Es+YKdMmZ0bXHc4IGyKTixTrLlOwbiOuUuOZlARmIZd2sWgjZ21IWmbjRGAtIKUGUYszOsQsLughHtsn3kk++ffe3JY1opFyW/EcsXgYnl4Fdh4XXuhGbrGN23sC+gbiUMgTCC6TAEDGQ6cpitIDBN5AlAwENiGtl4ZFSBGHEgqba3rq7sKBNefNCMwZ3G4e5EVmt0WGkfGSv8V9dszFZnerG5ZiNCmiYAC+ogawNwS4Ygoxyv4oxICgwRCkthjIyMZkKghrIaIrM2Fqww3gvFnQRjrwRZuM4jBFZzaXIc9oAIxXNmtb5GV4OTxw46S7iCXw0PqMLUoGgZKPBSHmndJVivn74v5UxGYiU0pWqkVVhujIpNaUKDCdTCgThG03I/bR7saAdeXvuIqQpuIjnSrUE7g/BfeenIU66i7uHby14Qxx8xorB8WME9x+WQkrhobizMEhoupi7h4mMbaZINwsgC0I2cSqE3GG7IwvanbMfxzQ7RH3wWV6Ys2fPWNHXbcaGGXKqbO+vxeuxNE0Xs0OssuCs/85lysP7ON7QhTEE30C9Wp+PNZJyuo0s/EhrSMneP1yQaQuZoPZWPSTZ22tXWZBjLr4jam7lwnLezadb/YzlWiKGpO4ePisTpw1TBCHrtvZZzYt7Z09B2QYjdRrlbrvLLfjq08d6KC7MX42wZgJfbhasMK/wztvvhYvbyjIw8UfuS3xMhjRENxBjxCP+yEBKNSkLmi4ZyKagICBrmPBPsV1oQac7/vPk9XuhvlmW1THQlxsVGHFWBedd7OWM/UTDYYOAKTGqEZQvDWIMEJCBADBQZOIGZSI1jQoM1G2UmYJZLaCRSY1M0dTZujs4/2wLOlQflE53sOTlEmbJdWjSKVXJrO3dkGfv5Sqw4/vOtH85VEcbrYPnCRCEkSJIrC1OEpNBlPhcqPghqKOarFGBsQaGxAc1U2RSeBUETx2TLOhcA6frdvFBec3HZiOTmpqZgM8gCxAEWR5ZszZdw42NIO3Zb1GO1vcPVgAnHYi5SipTlxYTcWRaMhAUjbFQM0kZiwcpMAoEGIhGS9Y7hVQBPZRuAm8CSAXT3Wc7yYIOMtj2GZgJ+Ay4CgTB2eVFUNopD+LggScC8chZykam7cpkoXdSPBgFGajFaBs9kiZosrqy0B2ClG34XXUnWXBXKz4Wc2M7cFjwxg706T3OYcGnd2Y3tuKbtOCNndGNP85hwRs/4P0/3mHB/Z/Rja/wsOCNH/D+H++w4P7P6MZXeFjwxg94/4/3PwAAAP//gJCckgAAAAZJREFUAwB/i22EUth9FgAAAABJRU5ErkJggg==" alt="Northmore Gordon logo">
-  <h2>Battery STC &amp; PDRS BESS Calculator</h2>
+        <img class="brand-logo" src="NG-RGB-colour-transparent.png" alt="Northmore Gordon logo">
+  <h2>Battery STC &amp; BESS Calculator</h2>
 </div>
 
 <div class="layout">
 
   <div class="input-panel">
-    <div class="panel-label">Select Scheme / Activity</div>
+    <div class="panel-label">Select Calculator</div>
     <div class="scheme-tabs">
-      <div class="scheme-tab active" data-scheme="bstc" onclick="switchScheme('bstc')">Battery STC</div>
-      <div class="scheme-tab" data-scheme="bess3" onclick="switchScheme('bess3')">BESS3</div>
-      <div class="scheme-tab" data-scheme="bess4" onclick="switchScheme('bess4')">BESS4</div>
-      <div class="scheme-tab" data-scheme="bess5" onclick="switchScheme('bess5')">BESS5</div>
+      <div class="scheme-tab active" data-scheme="stc" onclick="switchScheme('stc')">Battery STC</div>
+      <div class="scheme-tab" data-scheme="bess" onclick="switchScheme('bess')">BESS PRC</div>
     </div>
 
     <div class="panel-label" id="params-label">Battery Installation Parameters</div>
@@ -816,221 +916,71 @@
       <div class="field">
         <label>Installation Date</label>
         <input type="date" id="install-date" min="2026-01-01" max="2030-12-31" />
-        <div id="factor-preview" style="display:none; margin-top:6px; padding:8px 12px; background:rgba(33,170,255,0.08); border:1px solid rgba(33,170,255,0.22); border-radius:8px; font-size:12px; color:#34374c; font-weight:600;"></div>
       </div>
 
       <div class="field">
-        <label>Nominal Battery Capacity (kWh)</label>
-        <input type="number" id="nominal-kwh" min="0.1" step="0.1" placeholder="e.g. 15.0" />
-      </div>
-
-      <div class="field">
-        <label>Usable Battery Capacity (kWh)</label>
+        <label class="label-with-help">Battery Capacity (kWh)
+          <button type="button" class="help-tip" aria-label="Battery capacity guidance" data-tip="Enter the battery's usable capacity. If only nominal capacity is known, usable capacity may be estimated as nominal capacity × 90%.">i</button>
+        </label>
         <input type="number" id="battery-kwh" min="0.1" step="0.1" placeholder="e.g. 13.5" />
       </div>
 
-      <div class="taper-info">
-        <strong>Taper Schedule (from 1 May 2026)</strong>
-        <span>0–14 kWh → STC factor at <strong>100%</strong></span>
-        <span>14–28 kWh → STC factor at <strong>60%</strong> on marginal kWh</span>
-        <span>28–50 kWh → STC factor at <strong>15%</strong> on marginal kWh</span>
-        <span style="margin-top:4px;color:#6b6860;font-size:11px;">Eligible nominal battery capacity range: 5–100 kWh. STCs can only be claimed for the first 50 kWh of usable capacity. No zone rating or deeming period applies.</span>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="field">
-        <label>BSTC Spot Price</label>
-        <div class="pfx-wrap">
-          <span class="pfx">$</span>
-          <input type="number" id="bstc-price" min="0" step="0.01" placeholder="0.00" />
-        </div>
-      </div>
-
     </div>
 
-    <!-- BESS3 field group -->
-    <div class="field-group" id="fg-bess3" style="display:none;">
+    <!-- Consolidated public BESS field group; activity is selected automatically. -->
+    <div class="field-group" id="fg-bess" style="display:none;">
       <div class="field">
-        <label>Implementation Date</label>
-        <input type="date" id="b3-date" min="2026-09-01" max="2035-12-31" />
+        <label>Installation Date</label>
+        <input type="date" id="bess-date" min="2026-09-01" max="2035-12-31" />
       </div>
       <div class="field">
-        <label>Number of Individual Dwellings</label>
-        <input type="number" id="b3-dwellings" min="4" step="1" placeholder="e.g. 6" />
+        <label>Property Type</label>
+        <select id="bess-property" onchange="updateBessFields()">
+          <option value="business">Business / commercial site</option>
+          <option value="apartment">Apartment building</option>
+        </select>
+      </div>
+      <div class="field" id="bess-dwellings-field" style="display:none;">
+        <label>Number of Dwellings</label>
+        <input type="number" id="bess-dwellings" min="4" step="1" placeholder="e.g. 8" />
       </div>
       <div class="field">
-        <label>Nominal Battery Capacity (kWh)</label>
-        <input type="number" id="b3-kwh" min="22.3" max="222.2" step="0.1" placeholder="e.g. 29.0" />
-      </div>
-      <div class="field">
-        <label>Battery Inverter Output (kW)</label>
-        <input type="number" id="b3-inverter" min="0.1" step="0.1" placeholder="e.g. 5.0" />
+        <label class="label-with-help">Battery Capacity (kWh)
+          <button type="button" class="help-tip" aria-label="Battery capacity guidance" data-tip="Enter the battery's usable capacity. If only nominal capacity is known, usable capacity may be estimated as nominal capacity × 90%.">i</button>
+        </label>
+        <input type="number" id="bess-kwh" min="20.1" max="30000" step="0.1" placeholder="e.g. 200" />
       </div>
       <div class="field">
         <label>New Solar PV installed within 90 days of battery?</label>
-        <select id="b3-solar90">
+        <select id="bess-solar90">
           <option value="yes">Yes</option>
-          <option value="no">No / more than 90 days</option>
+          <option value="no">No</option>
         </select>
       </div>
       <div class="field">
-        <label>Distribution Network Area</label>
-        <select id="b3-dnsp">
-          <option value="1.04">Ausgrid (NLF 1.04)</option>
-          <option value="1.05">Endeavour Energy (NLF 1.05)</option>
-          <option value="1.05">Essential Energy (NLF 1.05)</option>
+        <label>Electricity Network</label>
+        <select id="bess-dnsp">
+          <option value="1.04">Ausgrid</option>
+          <option value="1.05">Endeavour Energy</option>
+          <option value="1.05">Essential Energy</option>
         </select>
-      </div>
-      <div class="divider"></div>
-      <div class="field">
-        <label>PRC Spot Price</label>
-        <div class="pfx-wrap">
-          <span class="pfx">$</span>
-          <input type="number" id="b3-price" min="0" step="0.01" placeholder="0.00" />
-        </div>
-      </div>
-
-      <div class="taper-info">
-        <strong>BESS3 equipment thresholds</strong>
-        <span>Usable Battery Capacity (Nominal × 90%): <strong>&gt;20 – ≤200 kWh</strong></span>
-        <span>Capacity must not exceed <strong>6×</strong> Battery Inverter Output</span>
-        <span>Internet-connectable and DRA-controllable; ≥10yr warranty, 70% capacity retention at 10yr</span>
-        <span style="margin-top:4px;color:#6b6860;font-size:11px;">Firmness Factor 1.0 · Lifetime 15 years (Table A6 / Activity Definition BESS3, PDRS Rule)</span>
-      </div>
-
-      <div class="elig-list">
-        <label class="elig-item"><input type="checkbox" id="b3-e1"> Site is an Apartment Building comprising not less than 4 individual dwellings</label>
-        <label class="elig-item"><input type="checkbox" id="b3-e2"> No existing BESS installed at the same NMI(s)</label>
-        <label class="elig-item"><input type="checkbox" id="b3-e3"> Equipment listed on approved product list; installed outdoors, Behind the Meter, per AS/NZS 5139</label>
-        <label class="elig-item"><input type="checkbox" id="b3-e4"> Installed by approved installer with SAA Grid-Connected Battery Storage accreditation; all planning/network approvals received</label>
-      </div>
-    </div>
-
-    <!-- BESS4 field group -->
-    <div class="field-group" id="fg-bess4" style="display:none;">
-      <div class="field">
-        <label>Implementation Date</label>
-        <input type="date" id="b4-date" min="2026-09-01" max="2035-12-31" />
-      </div>
-      <div class="field">
-        <label>Nominal Battery Capacity (kWh)</label>
-        <input type="number" id="b4-kwh" min="22.3" max="222.2" step="0.1" placeholder="e.g. 106.7" />
-      </div>
-      <div class="field">
-        <label>Battery Inverter Output (kW)</label>
-        <input type="number" id="b4-inverter" min="0.1" step="0.1" placeholder="e.g. 20" />
-      </div>
-      <div class="field">
-        <label>New Solar PV installed within 90 days of battery?</label>
-        <select id="b4-solar90">
-          <option value="yes">Yes</option>
-          <option value="no">No / more than 90 days</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Distribution Network Area</label>
-        <select id="b4-dnsp">
-          <option value="1.04">Ausgrid (NLF 1.04)</option>
-          <option value="1.05">Endeavour Energy (NLF 1.05)</option>
-          <option value="1.05">Essential Energy (NLF 1.05)</option>
-        </select>
-      </div>
-      <div class="divider"></div>
-      <div class="field">
-        <label>PRC Spot Price</label>
-        <div class="pfx-wrap">
-          <span class="pfx">$</span>
-          <input type="number" id="b4-price" min="0" step="0.01" placeholder="0.00" />
-        </div>
-      </div>
-
-      <div class="taper-info">
-        <strong>BESS4 equipment thresholds</strong>
-        <span>Usable Battery Capacity (Nominal × 90%): <strong>&gt;20 – ≤200 kWh</strong></span>
-        <span>Capacity must not exceed <strong>6×</strong> Battery Inverter Output</span>
-        <span>Internet-connectable and DRA-controllable; ≥10yr warranty, 70% capacity retention at 10yr</span>
-        <span style="margin-top:4px;color:#6b6860;font-size:11px;">Firmness Factor 1.0 · Lifetime 15 years (Table A6 / Activity Definition BESS4, PDRS Rule)</span>
-      </div>
-
-
-      <div class="elig-list">
-        <label class="elig-item"><input type="checkbox" id="b4-e1"> Site is not a Residential Building or a Data Centre</label>
-        <label class="elig-item"><input type="checkbox" id="b4-e2"> No prior BESS4 or BESS5 Implementation at this Site</label>
-        <label class="elig-item"><input type="checkbox" id="b4-e3"> Equipment listed on approved product list; installed Behind the Meter per AS/NZS 5139</label>
-        <label class="elig-item"><input type="checkbox" id="b4-e4"> Installed by approved installer with SAA accreditation; smoke alarm (AS 3786) if installed indoors in a Class 3 building</label>
-      </div>
-    </div>
-
-    <!-- BESS5 field group -->
-    <div class="field-group" id="fg-bess5" style="display:none;">
-      <div class="field">
-        <label>Implementation Date</label>
-        <input type="date" id="b5-date" min="2026-09-01" max="2035-12-31" />
-      </div>
-      <div class="field">
-        <label>Nominal Battery Capacity (kWh)</label>
-        <input type="number" id="b5-kwh" min="222.3" max="33333.3" step="0.1" placeholder="e.g. 555.6" />
-      </div>
-      <div class="field">
-        <label>Battery Inverter Output (kW)</label>
-        <input type="number" id="b5-inverter" min="0.1" step="0.1" placeholder="e.g. 125" />
-      </div>
-      <div class="field">
-        <label>New Solar PV installed within 90 days of battery?</label>
-        <select id="b5-solar90">
-          <option value="yes">Yes</option>
-          <option value="no">No / more than 90 days</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Distribution Network Area</label>
-        <select id="b5-dnsp">
-          <option value="1.04">Ausgrid (NLF 1.04)</option>
-          <option value="1.05">Endeavour Energy (NLF 1.05)</option>
-          <option value="1.05">Essential Energy (NLF 1.05)</option>
-        </select>
-      </div>
-      <div class="divider"></div>
-      <div class="field">
-        <label>PRC Spot Price</label>
-        <div class="pfx-wrap">
-          <span class="pfx">$</span>
-          <input type="number" id="b5-price" min="0" step="0.01" placeholder="0.00" />
-        </div>
-      </div>
-
-      <div class="taper-info">
-        <strong>BESS5 equipment thresholds</strong>
-        <span>Usable Battery Capacity (Nominal × 90%): <strong>&gt;200 – ≤30,000 kWh</strong></span>
-        <span>Capacity must not exceed <strong>6×</strong> Battery Inverter Output; UL9540A tested</span>
-        <span>Internet-connectable and DRA-controllable; capacity recorded in manner specified by Scheme Administrator</span>
-        <span style="margin-top:4px;color:#6b6860;font-size:11px;">Firmness Factor 1.0 · Lifetime 15 years (Table A6 / Activity Definition BESS5, PDRS Rule)</span>
-      </div>
-
-
-      <div class="elig-list">
-        <label class="elig-item"><input type="checkbox" id="b5-e1"> Site is not a Residential Building or a Data Centre</label>
-        <label class="elig-item"><input type="checkbox" id="b5-e2"> No prior BESS4 or BESS5 Implementation at this Site</label>
-        <label class="elig-item"><input type="checkbox" id="b5-e3"> Equipment tested to UL9540A; capacity recorded per Scheme Administrator method</label>
-        <label class="elig-item"><input type="checkbox" id="b5-e4"> Installed by suitably licensed person; all planning/network approvals received</label>
       </div>
     </div>
 
     <div id="error-box" class="error-box"></div>
-    <button class="calc-btn" id="calc-btn" onclick="calculate()">Calculate BSTCs</button>
+    <button class="calc-btn" id="calc-btn" onclick="calculate()">Calculate STCs</button>
   </div>
 
   <div class="results-panel" id="results-panel">
     <div class="empty-state">
       <div class="icon">🔋</div>
-      Enter installation details and click<br><strong id="empty-cta">Calculate BSTCs</strong> to see results.
+      Enter installation details and click<br><strong id="empty-cta">Calculate STCs</strong> to see results.
     </div>
   </div>
 
 </div>
 
-<script>
+<script type="text/plain" id="legacy-calculator-code">
 // Period schedule: [startDate (inclusive), endDate (inclusive), label, factor]
 // Dates as YYYY-MM-DD strings for easy comparison
 const PERIOD_SCHEDULE = [
@@ -1074,6 +1024,7 @@ function fmtDate(dateStr) {
 document.addEventListener('DOMContentLoaded', function() {
   const dateInput = document.getElementById('install-date');
   const preview   = document.getElementById('factor-preview');
+  if (!dateInput || !preview) return;
   dateInput.addEventListener('change', function() {
     const p = getPeriod(this.value);
     if (p) {
@@ -1146,7 +1097,7 @@ function calculateBSTC() {
   let html = `
   <div class="client-summary">
     <div class="summary-header">
-      <div class="summary-title"><span>Battery STC Estimate</span><img class="summary-logo" src="${document.querySelector('.brand-logo').src}" alt="Northmore Gordon logo"></div>
+      <div class="summary-title"><span>Battery STC Estimate</span></div>
     </div>
     <div class="summary-body">
       <div class="summary-grid">
@@ -1342,7 +1293,7 @@ function calculateBESS(scheme) {
   let html = `
   <div class="client-summary">
     <div class="summary-header">
-      <div class="summary-title"><span>${activityLabel} Peak Reduction Certificate Estimate</span><img class="summary-logo" src="${document.querySelector('.brand-logo').src}" alt="Northmore Gordon logo"></div>
+      <div class="summary-title"><span>${activityLabel} Peak Reduction Certificate Estimate</span></div>
     </div>
     <div class="summary-body">
       <div class="summary-grid">
@@ -1398,6 +1349,254 @@ function calculateBESS(scheme) {
 
   document.getElementById('results-panel').innerHTML = html;
 }
+</script>
+
+<script>
+/* Simplified public calculator experience */
+const PERIOD_SCHEDULE_PUBLIC = [
+  { from: '2026-01-01', to: '2026-04-30', factor: 8.4 },
+  { from: '2026-05-01', to: '2026-12-31', factor: 6.8 },
+  { from: '2027-01-01', to: '2027-06-30', factor: 5.7 },
+  { from: '2027-07-01', to: '2027-12-31', factor: 5.2 },
+  { from: '2028-01-01', to: '2028-06-30', factor: 4.6 },
+  { from: '2028-07-01', to: '2028-12-31', factor: 4.1 },
+  { from: '2029-01-01', to: '2029-06-30', factor: 3.6 },
+  { from: '2029-07-01', to: '2029-12-31', factor: 3.1 },
+  { from: '2030-01-01', to: '2030-06-30', factor: 2.6 },
+  { from: '2030-07-01', to: '2030-12-31', factor: 2.1 }
+];
+
+const PUBLIC_STC_PRICE = 39.90;
+const PUBLIC_PRC_PRICE = 2.80;
+const PUBLIC_DISCLAIMER = `This calculator provides an indicative estimate only. It assumes the entered battery capacity is usable capacity; where only nominal capacity is known, usable capacity may be estimated as 90% of nominal capacity. It also assumes all applicable site, nominal-capacity, product, installer, metering and scheme eligibility requirements are satisfied. The inverter output is assumed to be sufficient under the applicable four-hour capacity cap. STC estimates apply the scheme's usable-capacity claim cap. Values are based on indicative prices of $39.90 per STC and $2.80 per PRC and may change. Final eligibility, certificate quantity and payment remain subject to supporting evidence, Northmore Gordon review and scheme-administrator approval.`;
+
+let currentScheme = 'stc';
+
+function getPublicStcPeriod(dateStr) {
+  if (!dateStr) return null;
+  return PERIOD_SCHEDULE_PUBLIC.find(period => dateStr >= period.from && dateStr <= period.to) || null;
+}
+
+function fmt(n, digits = 0) {
+  return n.toLocaleString('en-AU', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits
+  });
+}
+
+function fmtD(n) {
+  return '$' + n.toLocaleString('en-AU', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function updateBessFields() {
+  const isApartment = document.getElementById('bess-property').value === 'apartment';
+  document.getElementById('bess-dwellings-field').style.display = isApartment ? 'flex' : 'none';
+  sendFrameHeight();
+}
+
+function switchScheme(scheme) {
+  currentScheme = scheme;
+  document.querySelectorAll('.scheme-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.scheme === scheme);
+  });
+
+  document.getElementById('fg-bstc').style.display = scheme === 'stc' ? 'flex' : 'none';
+  document.getElementById('fg-bess').style.display = scheme === 'bess' ? 'flex' : 'none';
+
+  const isStc = scheme === 'stc';
+  document.getElementById('params-label').textContent = 'Installation Details';
+  document.getElementById('calc-btn').textContent = isStc ? 'Calculate STCs' : 'Calculate PRCs';
+  document.getElementById('error-box').classList.remove('show');
+  document.getElementById('error-box').innerHTML = '';
+  document.getElementById('results-panel').innerHTML = `
+    <div class="empty-state">
+      <div class="icon">🔋</div>
+      Enter installation details and click<br><strong>${isStc ? 'Calculate STCs' : 'Calculate PRCs'}</strong> to see results.
+    </div>`;
+
+  if (!isStc) updateBessFields();
+  sendFrameHeight();
+}
+
+function calculate() {
+  if (currentScheme === 'stc') calculatePublicStc();
+  else calculatePublicBess();
+}
+
+function showPublicErrors(errors) {
+  const errBox = document.getElementById('error-box');
+  errBox.innerHTML = errors.map(error => `• ${error}`).join('<br>');
+  errBox.classList.toggle('show', errors.length > 0);
+  sendFrameHeight();
+}
+
+function renderPublicResult(kind, count, value) {
+  const isStc = kind === 'STC';
+  const title = isStc ? 'Battery STC Estimate' : 'BESS PRC Estimate';
+
+  document.getElementById('results-panel').innerHTML = `
+    <div class="client-summary">
+      <div class="summary-header">
+        <div class="summary-title">
+          <span>${title}</span>
+        </div>
+      </div>
+      <div class="summary-body">
+        <div class="compact-results">
+          <div class="result-metric">
+            <span class="metric-label">Estimated ${kind}s</span>
+            <span class="metric-value">${fmt(count)}</span>
+          </div>
+          <div class="result-metric">
+            <span class="metric-label">Estimated Value</span>
+            <span class="metric-value">${fmtD(value)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="result-disclaimer">
+        <strong>Important:</strong> ${PUBLIC_DISCLAIMER}
+        <span class="contact-prompt">Contact Northmore Gordon for a detailed assessment.</span>
+      </div>
+    </div>`;
+
+  requestAnimationFrame(() => {
+    fitResultMetricValues();
+    sendFrameHeight();
+  });
+}
+
+function fitResultMetricValues() {
+  document.querySelectorAll('.result-metric .metric-value').forEach((element) => {
+    element.style.fontSize = '';
+    const minimumSize = 24;
+    let fontSize = parseFloat(getComputedStyle(element).fontSize);
+
+    while (element.scrollWidth > element.clientWidth && fontSize > minimumSize) {
+      fontSize -= 1;
+      element.style.fontSize = `${fontSize}px`;
+    }
+  });
+}
+
+function calculatePublicStc() {
+  const dateStr = document.getElementById('install-date').value;
+  const capacityRaw = parseFloat(document.getElementById('battery-kwh').value);
+  const errors = [];
+
+  if (!dateStr) errors.push('Enter an installation date.');
+  const period = dateStr ? getPublicStcPeriod(dateStr) : null;
+  if (dateStr && !period) {
+    errors.push('Installation date must be between 1 January 2026 and 31 December 2030.');
+  }
+  if (isNaN(capacityRaw) || capacityRaw <= 0) {
+    errors.push('Enter a valid battery capacity in kWh.');
+  }
+
+  showPublicErrors(errors);
+  if (errors.length) return;
+
+  const capacity = Math.min(capacityRaw, 50);
+  const factor = period.factor;
+  const band1 = Math.min(capacity, 14);
+  const band2 = Math.max(0, Math.min(capacity, 28) - 14);
+  const band3 = Math.max(0, Math.min(capacity, 50) - 28);
+  const rawCertificates =
+    (band1 * factor) +
+    (band2 * factor * 0.60) +
+    (band3 * factor * 0.15);
+  const certificateCount = Math.floor(rawCertificates);
+
+  renderPublicResult('STC', certificateCount, certificateCount * PUBLIC_STC_PRICE);
+}
+
+function calculatePublicBess() {
+  const dateStr = document.getElementById('bess-date').value;
+  const propertyType = document.getElementById('bess-property').value;
+  const capacity = parseFloat(document.getElementById('bess-kwh').value);
+  const solarWithin90Days = document.getElementById('bess-solar90').value === 'yes';
+  const networkLossFactor = parseFloat(document.getElementById('bess-dnsp').value);
+  const dwellings = propertyType === 'apartment'
+    ? parseInt(document.getElementById('bess-dwellings').value, 10)
+    : null;
+  const errors = [];
+
+  if (!dateStr) errors.push('Enter an installation date.');
+  else if (dateStr < '2026-09-01') {
+    errors.push('Installation date must be on or after 1 September 2026.');
+  }
+
+  if (isNaN(capacity) || capacity <= 0) {
+    errors.push('Enter a valid battery capacity in kWh.');
+  } else if (capacity <= 20 || capacity > 30000) {
+    errors.push('Battery capacity must be above 20 kWh and no more than 30,000 kWh.');
+  }
+
+  if (propertyType === 'apartment') {
+    if (isNaN(dwellings) || dwellings < 4) {
+      errors.push('Enter at least 4 dwellings for an apartment building.');
+    }
+    if (!isNaN(capacity) && capacity > 200) {
+      errors.push('Apartment-building estimates support battery capacity up to 200 kWh. Contact Northmore Gordon for a tailored assessment.');
+    }
+  }
+
+  showPublicErrors(errors);
+  if (errors.length) return;
+
+  let eligibleCapacity;
+  let demandShiftingComponent;
+
+  if (propertyType === 'apartment') {
+    eligibleCapacity = Math.min(capacity, dwellings * 5);
+    const rate = solarWithin90Days ? 0.12 : 0.0853;
+    demandShiftingComponent = eligibleCapacity * rate;
+  } else if (capacity <= 200) {
+    eligibleCapacity = capacity;
+    const rate = solarWithin90Days ? 0.10 : 0.067;
+    if (eligibleCapacity <= 50) {
+      demandShiftingComponent = eligibleCapacity * rate * 0.5;
+    } else if (eligibleCapacity <= 100) {
+      demandShiftingComponent =
+        (50 * rate * 0.5) +
+        ((eligibleCapacity - 50) * rate * 0.7);
+    } else {
+      demandShiftingComponent = eligibleCapacity * rate;
+    }
+  } else {
+    eligibleCapacity = Math.min(capacity, 10000);
+    const rate = solarWithin90Days ? 0.10 : 0.067;
+    demandShiftingComponent = eligibleCapacity * rate;
+  }
+
+  const peakDemandReductionCapacity = demandShiftingComponent * 6 * 15;
+  const rawCertificates = peakDemandReductionCapacity * networkLossFactor * 10;
+  const certificateCount = Math.floor(rawCertificates);
+
+  renderPublicResult('PRC', certificateCount, certificateCount * PUBLIC_PRC_PRICE);
+}
+
+let frameResizeRequest = null;
+function sendFrameHeight() {
+  if (frameResizeRequest) cancelAnimationFrame(frameResizeRequest);
+  frameResizeRequest = requestAnimationFrame(() => {
+    const height = Math.ceil(document.documentElement.scrollHeight);
+    window.parent.postMessage({ type: 'ng-calculator-resize', height }, '*');
+    frameResizeRequest = null;
+  });
+}
+
+window.addEventListener('load', sendFrameHeight);
+window.addEventListener('resize', () => {
+  fitResultMetricValues();
+  sendFrameHeight();
+});
+if ('ResizeObserver' in window) {
+  new ResizeObserver(sendFrameHeight).observe(document.body);
+}
+switchScheme('stc');
 </script>
 </body>
 </html>
